@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Who's That Paw?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #121212;
+            padding: 20px;
+            color: #f5f5f5;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            text-align: center;
+            color: #f5f5f5;
+            text-decoration: none;
+            flex: 1;
+            transition: background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-item.active {
+            background-color: #bb86fc;
+            color: #121212;
+            font-weight: bold;
+        }
+
+        .nav-item:hover:not(.active) {
+            background-color: #3d3d3d;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #f5f5f5;
+            font-size: 2.5rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed #444;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .upload-area:hover {
+            border-color: #888;
+        }
+        
+        .upload-area.has-image {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .upload-text {
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .select-btn {
+            background-color: #bb86fc;
+            color: #121212;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+        
+        .select-btn:hover {
+            background-color: #9d63e4;
+        }
+        
+        .image-preview-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .image-preview {
+            max-height: 300px;
+            max-width: 100%;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .classify-btn {
+            background-color: #03dac6;
+            color: #121212;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+        
+        .classify-btn:hover {
+            background-color: #00b8a9;
+        }
+        
+        .classify-btn:disabled {
+            background-color: #4f4f4f;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+        
+        .reset-btn {
+            background-color: #333333;
+            color: #f5f5f5;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .reset-btn:hover {
+            background-color: #444444;
+        }
+        
+        .error-message {
+            background-color: #cf6679;
+            color: #121212;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            display: none;
+            font-weight: bold;
+        }
+        
+        .results-container {
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            display: none;
+            text-align: center;
+        }
+        
+        .results-text {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #f5f5f5;
+        }
+        
+        .breed-name {
+            font-size: 32px;
+            font-weight: 700;
+            color: #bb86fc;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .loader {
+            display: none;
+            width: 30px;
+            height: 30px;
+            border: 5px solid #333;
+            border-top: 5px solid #03dac6;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loader-text {
+            display: none;
+        }
+
+        .paw-icon {
+            font-size: 2.5rem;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        .result-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        /* Authentication styles */
+        #auth-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            background-color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .tab.active {
+            background-color: #bb86fc;
+            color: #121212;
+            font-weight: bold;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ccc;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background-color: #333;
+            color: #f5f5f5;
+            transition: border 0.3s;
+        }
+        
+        input:focus {
+            border-color: #bb86fc;
+            outline: none;
+        }
+        
+        .auth-btn {
+            background-color: #bb86fc;
+            color: #121212;
+            border: none;
+            width: 100%;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .auth-btn:hover {
+            background-color: #9d63e4;
+        }
+        
+        #login-form, #signup-form {
+            display: none;
+        }
+        
+        .form-active {
+            display: block !important;
+        }
+        
+        .auth-error {
+            color: #cf6679;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .auth-success {
+            color: #03dac6;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        #app-container {
+            display: none;
+        }
+        
+        .user-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .welcome-text {
+            color: #ccc;
+        }
+        
+        .username {
+            color: #bb86fc;
+            font-weight: bold;
+        }
+        
+        .logout-btn {
+            background-color: #333;
+            color: #f5f5f5;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: #444;
+        }
+
+        /* Breed Information Styles */
+        .view-info-btn {
+            background-color: #bb86fc;
+            color: #121212;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            margin-top: 15px;
+            display: inline-block;
+        }
+        
+        .view-info-btn:hover {
+            background-color: #9d63e4;
+        }
+        
+        .breed-info-container {
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .breed-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .breed-info-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #bb86fc;
+        }
+        
+        .breed-info-section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #03dac6;
+            margin-bottom: 10px;
+        }
+        
+        .breed-characteristics {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .characteristic {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .characteristic-title {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+        
+        .characteristic-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f5f5f5;
+        }
+        
+        .health-concerns {
+            margin-top: 15px;
+        }
+        
+        .health-item {
+            background-color: #333;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .health-item-title {
+            font-weight: 600;
+            color: #f5f5f5;
+            margin-bottom: 5px;
+        }
+        
+        .health-item-desc {
+            color: #ccc;
+            font-size: 14px;
+        }
+        
+        .close-info-btn {
+            background-color: #333;
+            color: #f5f5f5;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .close-info-btn:hover {
+            background-color: #444;
+        }
+
+        .additional-breeds {
+            margin-top: 15px;
+            color: #ccc;
+            font-size: 16px;
+        }
+
+        .similar-breed {
+            color: #bb86fc;
+            font-weight: 600;
+        }
+
+        /* User Profile Styles */
+        .profile-section {
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .profile-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #f5f5f5;
+        }
+        
+        .recent-uploads {
+            margin-top: 20px;
+        }
+        
+        .uploads-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #03dac6;
+            margin-bottom: 15px;
+        }
+        
+        .uploads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .upload-item {
+            background-color: #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .upload-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .upload-info {
+            padding: 10px;
+        }
+        
+        .upload-type {
+            font-size: 12px;
+            color: #bb86fc;
+            margin-bottom: 5px;
+        }
+        
+        .upload-date {
+            font-size: 11px;
+            color: #ccc;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .upload-area {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .user-panel {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .breed-characteristics {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .uploads-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Container -->
+    <div class="container" id="auth-container">
+        <h1><span class="paw-icon">🐾</span> Who's That Paw?</h1>
+        <div class="tabs">
+            <div class="tab active" id="login-tab">Login</div>
+            <div class="tab" id="signup-tab">Sign Up</div>
+        </div>
+        
+        <form id="login-form" class="form-active">
+            <div class="form-group">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" required>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" required>
+            </div>
+            <div id="login-error" class="auth-error"></div>
+            <button type="submit" class="auth-btn">Login</button>
+        </form>
+        
+        <form id="signup-form">
+            <div class="form-group">
+                <label for="signup-name">Full Name</label>
+                <input type="text" id="signup-name" required>
+            </div>
+            <div class="form-group">
+                <label for="signup-email">Email</label>
+                <input type="email" id="signup-email" required>
+            </div>
+            <div class="form-group">
+                <label for="signup-password">Password</label>
+                <input type="password" id="signup-password" required>
+            </div>
+            <div class="form-group">
+                <label for="signup-confirm">Confirm Password</label>
+                <input type="password" id="signup-confirm" required>
+            </div>
+            <div id="signup-error" class="auth-error"></div>
+            <button type="submit" class="auth-btn">Sign Up</button>
+        </form>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="container" id="app-container">
+        <div class="user-panel">
+            <div class="welcome-text">Welcome, <span id="user-name" class="username"></span>!</div>
+            <button id="logout-btn" class="logout-btn">Logout</button>
+        </div>
+
+        <h1><span class="paw-icon">🐾</span> Who's That Paw?</h1>
+        
+        <div class="nav-bar">
+            <a href="/" class="nav-item active">Breed Classifier</a>
+            <a href="/pawprints" class="nav-item">Community Pawprints</a>
+            <a href="/profile" class="nav-item">My Profile</a>
+        </div>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-text" id="uploadText">Upload a pet image to identify the animal and breed</div>
+            <div class="image-preview-container" id="previewContainer" style="display: none;">
+                <img id="imagePreview" class="image-preview" alt="Preview">
+            </div>
+            <div id="initialButtons">
+                <button id="selectBtn" class="select-btn">Select Image</button>
+            </div>
+            <div id="actionButtons" class="button-group" style="display: none;">
+                <button id="resetBtn" class="reset-btn">Change Image</button>
+                <button id="classifyBtn" class="classify-btn">
+                    <div id="loader" class="loader"></div>
+                    <span id="classifyText">Identify</span>
+                    <span id="loaderText" class="loader-text">Analyzing...</span>
+                </button>
+            </div>
+            <input type="file" id="fileInput" class="file-input" accept="image/*">
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        
+        <div id="resultsContainer" class="results-container">
+            <div id="animalType" class="results-text">This is a</div>
+            <div id="breedName" class="breed-name"></div>
+            <div id="alternativeBreeds" class="additional-breeds"></div>
+            <img id="resultImage" class="result-image" alt="Classified image">
+            <button id="viewInfoBtn" class="view-info-btn">View Breed Information</button>
+            
+            <!-- Breed Information Section -->
+            <div id="breedInfoContainer" class="breed-info-container">
+                <div class="breed-info-header">
+                    <div class="breed-info-title" id="breedInfoTitle"></div>
+                    <button id="closeInfoBtn" class="close-info-btn">Close</button>
+                </div>
+                
+                <div class="breed-info-section">
+                    <div class="section-title">Overview</div>
+                    <p id="breedOverview"></p>
+                </div>
+                
+                <div class="breed-info-section">
+                    <div class="section-title">Characteristics</div>
+                    <div class="breed-characteristics" id="breedCharacteristics">
+                        <!-- Characteristics will be added dynamically -->
+                    </div>
+                </div>
+                
+                <div class="breed-info-section">
+                    <div class="section-title">Health Concerns</div>
+                    <div class="health-concerns" id="healthConcerns">
+                        <!-- Health concerns will be added dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // DOM elements - Authentication
+        const loginTab = document.getElementById('login-tab');
+        const signupTab = document.getElementById('signup-tab');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const loginError = document.getElementById('login-error');
+        const signupError = document.getElementById('signup-error');
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        const userName = document.getElementById('user-name');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // DOM elements - Pet Classifier
+        const fileInput = document.getElementById('fileInput');
+        const selectBtn = document.getElementById('selectBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const classifyBtn = document.getElementById('classifyBtn');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewContainer = document.getElementById('previewContainer');
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadText = document.getElementById('uploadText');
+        const initialButtons = document.getElementById('initialButtons');
+        const actionButtons = document.getElementById('actionButtons');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const animalType = document.getElementById('animalType');
+        const breedName = document.getElementById('breedName');
+        const alternativeBreeds = document.getElementById('alternativeBreeds');
+        const loader = document.getElementById('loader');
+        const classifyText = document.getElementById('classifyText');
+        const loaderText = document.getElementById('loaderText');
+        const resultImage = document.getElementById('resultImage');
+        
+        // DOM elements - Breed Information
+        const viewInfoBtn = document.getElementById('viewInfoBtn');
+        const breedInfoContainer = document.getElementById('breedInfoContainer');
+        const breedInfoTitle = document.getElementById('breedInfoTitle');
+        const breedOverview = document.getElementById('breedOverview');
+        const breedCharacteristics = document.getElementById('breedCharacteristics');
+        const healthConcerns = document.getElementById('healthConcerns');
+        const closeInfoBtn = document.getElementById('closeInfoBtn');
+
+        // Variables to track current prediction results
+        let currentSpecies = "";
+        let currentBreed = "";
+        let currentTopBreeds = [];
+
+        // Check if user is already logged in
+        checkAuthentication();
+
+        // Authentication Event Listeners
+        loginTab.addEventListener('click', () => {
+            loginTab.classList.add('active');
+            signupTab.classList.remove('active');
+            loginForm.classList.add('form-active');
+            signupForm.classList.remove('form-active');
+        });
+
+        signupTab.addEventListener('click', () => {
+            signupTab.classList.add('active');
+            loginTab.classList.remove('active');
+            signupForm.classList.add('form-active');
+            loginForm.classList.remove('form-active');
+        });
+
+        // Handle signup
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+            
+            // Basic validation
+            if (password !== confirm) {
+                signupError.textContent = "Passwords don't match";
+                return;
+            }
+            
+            if (password.length < 6) {
+                signupError.textContent = "Password must be at least 6 characters";
+                return;
+            }
+            
+            // Send signup request to server
+            fetch('/api/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear form and show success
+                    signupForm.reset();
+                    signupError.textContent = "Registration successful! Please login.";
+                    signupError.className = "auth-success";
+                    
+                    // Switch to login tab
+                    setTimeout(() => {
+                        loginTab.click();
+                        signupError.textContent = "";
+                        signupError.className = "auth-error";
+                    }, 2000);
+                } else {
+                    signupError.textContent = data.message || "Registration failed";
+                }
+            })
+            .catch(error => {
+                signupError.textContent = "An error occurred. Please try again.";
+                console.error('Error:', error);
+            });
+        });
+
+        // Handle login
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            // Send login request to server
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show app
+                    showApp(data.user);
+                    loginForm.reset();
+                } else {
+                    loginError.textContent = data.message || "Invalid email or password";
+                }
+            })
+            .catch(error => {
+                loginError.textContent = "An error occurred. Please try again.";
+                console.error('Error:', error);
+            });
+        });
+
+        // Handle logout
+        logoutBtn.addEventListener('click', () => {
+            fetch('/api/logout', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    hideApp();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        // Check authentication status
+        function checkAuthentication() {
+            fetch('/api/check-auth')
+            .then(response => response.json())
+            .then(data => {
+                if (data.authenticated) {
+                    showApp(data.user);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Show app function
+        function showApp(user) {
+            authContainer.style.display = 'none';
+            appContainer.style.display = 'block';
+            userName.textContent = user.name;
+            resetForm(); // Reset the pet classifier form when showing app
+        }
+
+        // Hide app function
+        function hideApp() {
+            appContainer.style.display = 'none';
+            authContainer.style.display = 'block';
+            loginError.textContent = '';
+        }
+
+        // Pet Classifier Event Listeners
+        selectBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        resetBtn.addEventListener('click', resetForm);
+        classifyBtn.addEventListener('click', classifyImage);
+        viewInfoBtn.addEventListener('click', showBreedInfo);
+        closeInfoBtn.addEventListener('click', hideBreedInfo);
+
+        // Handle file selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.match('image.*')) {
+                showError('Please select an image file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                previewContainer.style.display = 'flex';
+                uploadArea.classList.add('has-image');
+                uploadText.style.display = 'none';
+                initialButtons.style.display = 'none';
+                actionButtons.style.display = 'flex';
+                hideError();
+                hideResults();
+                hideBreedInfo();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Reset form
+        function resetForm() {
+            fileInput.value = '';
+            imagePreview.src = '';
+            previewContainer.style.display = 'none';
+            imagePreview.style.display = 'none';
+            uploadArea.classList.remove('has-image');
+            uploadText.style.display = 'block';
+            initialButtons.style.display = 'block';
+            actionButtons.style.display = 'none';
+            hideError();
+            hideResults();
+            hideBreedInfo();
+            
+            // Reset prediction tracking variables
+            currentSpecies = "";
+            currentBreed = "";
+            currentTopBreeds = [];
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        // Hide error message
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        // Hide results
+        function hideResults() {
+            resultsContainer.style.display = 'none';
+        }
+        
+        // Hide breed info
+        function hideBreedInfo() {
+            breedInfoContainer.style.display = 'none';
+            viewInfoBtn.style.display = 'inline-block';
+        }
+        
+        // Show breed info
+        function showBreedInfo() {
+            // Create the database key based on species and breed
+            const databaseKey = `${currentSpecies}_${currentBreed}`;
+            
+            if (breedDatabase[databaseKey]) {
+                // Populate breed info
+                breedInfoTitle.textContent = `${currentBreed} (${currentSpecies})`;
+                breedOverview.textContent = breedDatabase[databaseKey].overview;
+                
+                // Clear and populate characteristics
+                breedCharacteristics.innerHTML = '';
+                for (const [key, value] of Object.entries(breedDatabase[databaseKey].characteristics)) {
+                    breedCharacteristics.innerHTML += `
+                        <div class="characteristic">
+                            <div class="characteristic-title">${key}</div>
+                            <div class="characteristic-value">${value}</div>
+                        </div>
+                    `;
+                }
+                
+                // Clear and populate health concerns
+                healthConcerns.innerHTML = '';
+                breedDatabase[databaseKey].healthConcerns.forEach(concern => {
+                    healthConcerns.innerHTML += `
+                        <div class="health-item">
+                            <div class="health-item-title">${concern.title}</div>
+                            <div class="health-item-desc">${concern.description}</div>
+                        </div>
+                    `;
+                });
+                
+                // Show breed info container
+                breedInfoContainer.style.display = 'block';
+                // Hide the view info button when info is displayed
+                viewInfoBtn.style.display = 'none';
+            } else {
+                showError(`Information about ${currentBreed} ${currentSpecies}s is not available.`);
+            }
+        }
+
+        // Classify image
+        function classifyImage() {
+            if (!fileInput.files.length) {
+                showError('Please select an image first');
+                return;
+            }
+
+            // Show loading state
+            classifyBtn.disabled = true;
+            loader.style.display = 'inline-block';
+            classifyText.style.display = 'none';
+            loaderText.style.display = 'inline-block';
+            hideError();
+            hideBreedInfo();
+
+            // Create form data for the API request
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            // Make API request to Flask backend
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                // Store current prediction data
+                currentSpecies = data.species;
+                currentBreed = data.breed !== 'Unknown' ? data.breed : 'Unknown Breed';
+                currentTopBreeds = data.top_breeds || [];
+                
+                // Display the results from the model
+                displayResults(data);
+            })
+            .catch(error => {
+                showError('Error classifying image. Please try again.');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                // Reset loading state
+                classifyBtn.disabled = false;
+                loader.style.display = 'none';
+                classifyText.style.display = 'inline-block';
+                loaderText.style.display = 'none';
+            });
+        }
+
+        // Display results
+        function displayResults(data) {
+            // Display species and breed
+            animalType.textContent = `This is a ${data.species}`;
+            
+            if (data.breed !== 'Unknown') {
+                breedName.textContent = data.breed;
+                
+                // Check if there are multiple possible breeds with similar confidence
+                if (data.top_breeds && data.top_breeds.length > 1) {
+                    const similarBreeds = data.top_breeds
+                        .slice(1, 3) // Get the next 2 breeds after the top one
+                        .filter(b => b.confidence > (data.breed_confidence * 0.7)); // Only include if confidence is close
+                    
+                    if (similarBreeds.length > 0) {
+                        const breedNames = similarBreeds.map(b => `<span class="similar-breed">${b.breed}</span>`);
+                        alternativeBreeds.innerHTML = `Similar to ${breedNames.join(' or ')}`;
+                        alternativeBreeds.style.display = 'block';
+                    } else {
+                        alternativeBreeds.style.display = 'none';
+                    }
+                } else {
+                    alternativeBreeds.style.display = 'none';
+                }
+                
+                // Show view info button only if we have a confident breed prediction
+                viewInfoBtn.style.display = 'inline-block';
+            } else {
+                breedName.textContent = 'Unknown Breed';
+                
+                // If there are potential breeds, list them
+                if (data.top_breeds && data.top_breeds.length > 0) {
+                    const possibleBreeds = data.top_breeds
+                        .slice(0, 2) // Get top 2 breeds
+                        .map(b => `<span class="similar-breed">${b.breed}</span>`);
+                    
+                    alternativeBreeds.innerHTML = `Could be ${possibleBreeds.join(' or ')}`;
+                    alternativeBreeds.style.display = 'block';
+                } else {
+                    alternativeBreeds.style.display = 'none';
+                }
+                
+                // Hide view info button for unknown breed
+                viewInfoBtn.style.display = 'none';
+            }
+            
+            // Display the processed image if available
+            if (data.image_path) {
+                resultImage.src = data.image_path;
+                resultImage.style.display = 'block';
+            } else {
+                // Just show the preview image
+                resultImage.src = imagePreview.src;
+                resultImage.style.display = 'block';
+            }
+            
+            resultsContainer.style.display = 'block';
+            // Hide breed info when showing new results
+            hideBreedInfo();
+        }
+
+        // Breed information database
+        const breedDatabase = {
+            // Cat breeds
+            "Cat_Abyssinian": {
+                overview: "Abyssinians are highly intelligent, active cats with a playful, curious nature. They are known for their distinctive ticked coat pattern and love for heights.",
+                characteristics: {
+                    "Temperament": "Active, Intelligent",
+                    "Coat": "Short, Ticked",
+                    "Size": "Medium",
+                    "Lifespan": "14-15 years",
+                    "Activity Level": "Very High"
+                },
+                healthConcerns: [
+                    {
+                        title: "Progressive Retinal Atrophy",
+                        description: "A genetic condition that causes degeneration of the retina, leading to vision loss."
+                    },
+                    {
+                        title: "Pyruvate Kinase Deficiency",
+                        description: "An inherited condition that affects red blood cells, causing anemia."
+                    }
+                ]
+            },
+            "Cat_Bengal": {
+                overview: "Bengals are active, playful cats with a distinctive wild appearance. Their coat features spotted or marbled patterns reminiscent of their Asian leopard cat ancestry.",
+                characteristics: {
+                    "Temperament": "Energetic, Playful",
+                    "Coat": "Short, Spotted/Marbled",
+                    "Size": "Medium to Large",
+                    "Lifespan": "12-16 years",
+                    "Activity Level": "Very High"
+                },
+                healthConcerns: [
+                    {
+                        title: "Hypertrophic Cardiomyopathy",
+                        description: "A condition causing thickening of the heart muscle, which can lead to heart failure."
+                    },
+                    {
+                        title: "Progressive Retinal Atrophy",
+                        description: "A genetic condition that causes degeneration of the retina, leading to vision loss."
+                    }
+                ]
+            },
+            // Add more cat breeds as needed...
+            
+            // Dog breeds
+            "Dog_American Bulldog": {
+                overview: "American Bulldogs are strong, athletic working dogs with a confident demeanor. They are loyal and protective of their families.",
+                characteristics: {
+                    "Temperament": "Confident, Loyal",
+                    "Coat": "Short, Smooth",
+                    "Size": "Large",
+                    "Lifespan": "10-16 years",
+                    "Activity Level": "Moderate to High"
+                },
+                healthConcerns: [
+                    {
+                        title: "Hip Dysplasia",
+                        description: "A malformation of the hip joint that can lead to arthritis and lameness."
+                    },
+                    {
+                        title: "Neuronal Ceroid Lipofuscinosis",
+                        description: "A rare genetic disorder affecting the nervous system."
+                    }
+                ]
+            },
+            "Dog_Beagle": {
+                overview: "Beagles are friendly, curious scent hounds with an excellent sense of smell. They are known for their melodious howl and happy-go-lucky personality.",
+                characteristics: {
+                    "Temperament": "Friendly, Curious",
+                    "Coat": "Short, Dense",
+                    "Size": "Small to Medium",
+                    "Lifespan": "12-15 years",
+                    "Activity Level": "High"
+                },
+                healthConcerns: [
+                    {
+                        title: "Epilepsy",
+                        description: "A neurological disorder that can cause seizures."
+                    },
+                    {
+                        title: "Cherry Eye",
+                        description: "A condition where the gland of the third eyelid protrudes and becomes visible."
+                    }
+                ]
+            }
+            // Add more dog breeds as needed...
+        };
+    </script>
+</body>
+</html>
+

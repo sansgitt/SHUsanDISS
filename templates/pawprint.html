@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawprints - Who's That Paw?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            padding: 20px;
+            color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #f5f5f5;
+            font-size: 2.5rem;
+        }
+
+        .paw-icon {
+            font-size: 2.5rem;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        /* Navigation styles */
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            text-align: center;
+            color: #f5f5f5;
+            text-decoration: none;
+            flex: 1;
+            transition: background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-item.active {
+            background-color: #bb86fc;
+            color: #121212;
+            font-weight: bold;
+        }
+
+        .nav-item:hover:not(.active) {
+            background-color: #3d3d3d;
+        }
+
+        /* User panel styles */
+        .user-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .welcome-text {
+            color: #ccc;
+        }
+
+        .username {
+            color: #bb86fc;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background-color: #333;
+            color: #f5f5f5;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #444;
+        }
+
+        /* Pawprints styles */
+        .upload-btn {
+            background-color: #bb86fc;
+            color: #121212;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            display: block;
+            margin: 0 auto 30px;
+        }
+
+        .upload-btn:hover {
+            background-color: #9d63e4;
+        }
+
+        .upload-modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow: auto; /* Allow scrolling in modal */
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            margin: 5% auto; /* Adjusted margin */
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #f5f5f5;
+        }
+
+        .close-modal {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #f5f5f5;
+        }
+
+        .upload-area {
+            border: 2px dashed #444;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #888;
+        }
+
+        .upload-text {
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .select-file-btn {
+            background-color: #333;
+            color: #f5f5f5;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .select-file-btn:hover {
+            background-color: #444;
+        }
+
+        .pet-type-container {
+            margin: 20px 0;
+        }
+
+        .pet-type-label {
+            margin-bottom: 10px;
+            display: block;
+            color: #ccc;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .radio-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .radio-container input {
+            margin-right: 8px;
+        }
+
+        .upload-submit {
+            background-color: #03dac6;
+            color: #121212;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        .upload-submit:hover {
+            background-color: #00b8a9;
+        }
+
+        .upload-submit:disabled {
+            background-color: #4f4f4f;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .upload-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+             background-color: #1e1e1e;
+             object-fit: contain;
+        }
+
+        .empty-gallery {
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            color: #ccc;
+            font-size: 18px;
+        }
+
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            display: flex; /* Use flex to manage image and content */
+            flex-direction: column;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .gallery-image-container {
+            flex-shrink: 0; /* Prevent image from shrinking */
+            height: 180px; /* Fixed height for consistency */
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1e1e1e;
+            overflow: hidden; /* Hide parts of image if it overflows container */
+        }
+
+        .gallery-image {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Changed to contain */
+            border-radius: 8px 8px 0 0; /* Apply border radius only to top corners */
+        }
+
+        .gallery-content {
+            padding: 15px;
+            flex-grow: 1; /* Allow content to take available space */
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        .pet-type {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .pet-type.cat {
+            background-color: #bb86fc;
+            color: #121212;
+        }
+
+        .pet-type.dog {
+            background-color: #03dac6;
+            color: #121212;
+        }
+
+        .gallery-user {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 8px;
+        }
+
+        .gallery-user span {
+            color: #bb86fc;
+            font-weight: 500;
+        }
+
+         .gallery-date {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .gallery-caption {
+            font-size: 14px;
+            color: #f5f5f5;
+            margin-bottom: 10px;
+            word-break: break-word; /* Prevent long words from overflowing */
+        }
+
+
+        /* Removed error message CSS */
+        /* .error-message {
+            background-color: #cf6679;
+            color: #121212;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            display: none;
+            font-weight: bold;
+        } */
+
+        /* Form Group for Caption */
+        .form-group {
+             margin-bottom: 20px;
+        }
+
+        .form-group label {
+             display: block;
+             margin-bottom: 8px;
+             font-weight: bold;
+             color: #ccc;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+             width: 100%;
+             padding: 10px;
+             border: 1px solid #444;
+             border-radius: 6px;
+             background-color: #333;
+             color: #f5f5f5;
+             transition: border 0.3s;
+             box-sizing: border-box; /* Include padding and border in element's total width */
+        }
+
+        .form-group textarea {
+             resize: vertical; /* Allow vertical resizing */
+             min-height: 80px; /* Minimum height for textarea */
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+             border-color: #bb86fc;
+             outline: none;
+        }
+
+
+        /* Responsive styles */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .user-panel {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .gallery-container {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 15px;
+            }
+
+            .gallery-image-container {
+                height: 140px; /* Adjust height for smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="user-panel">
+            <div class="welcome-text">Welcome, <span id="pawprints-user-name" class="username"></span>!</div>
+            <button id="pawprints-logout-btn" class="logout-btn">Logout</button>
+        </div>
+
+        <h1><span class="paw-icon">🐾</span> Pawprints</h1>
+
+        <div class="nav-bar">
+            <a href="/" class="nav-item">Breed Classifier</a>
+            <a href="/pawprints" class="nav-item active">Community Pawprints</a>
+            <a href="/profile" class="nav-item">My Profile</a>
+        </div>
+
+        <button id="show-upload-btn" class="upload-btn">Upload Pet Photo</button>
+
+        <div id="gallery-container" class="gallery-container">
+            </div>
+
+        <div id="empty-gallery" class="empty-gallery">
+            <p>No pet photos have been shared yet. Be the first to upload one!</p>
+        </div>
+    </div>
+
+    <div id="upload-modal" class="upload-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Upload Pet Photo</div>
+                <span class="close-modal">&times;</span>
+            </div>
+
+            <div class="upload-area">
+                <div class="upload-text">Select a photo of your cat or dog</div>
+                <button class="select-file-btn">Choose File</button>
+                <input type="file" id="pawprints-file-input" class="file-input" accept="image/*">
+            </div>
+
+            <img id="upload-preview" class="upload-preview">
+
+            <div class="pet-type-container">
+                <span class="pet-type-label">What type of pet is this?</span>
+                <div class="radio-group">
+                    <label class="radio-container">
+                        <input type="radio" name="pet-type" value="cat"> Cat
+                    </label>
+                    <label class="radio-container">
+                        <input type="radio" name="pet-type" value="dog"> Dog
+                    </label>
+                </div>
+            </div>
+
+             <div class="form-group">
+                 <label for="caption-input">Caption (Optional)</label>
+                 <textarea id="caption-input" placeholder="Add a caption..."></textarea>
+             </div>
+
+
+            <button id="upload-submit" class="upload-submit" disabled>Share Photo</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const userName = document.getElementById('pawprints-user-name');
+        const logoutBtn = document.getElementById('pawprints-logout-btn');
+        const fileInput = document.getElementById('pawprints-file-input');
+        const showUploadBtn = document.getElementById('show-upload-btn');
+        const uploadModal = document.getElementById('upload-modal');
+        const closeModal = document.querySelector('.close-modal');
+        const selectFileBtn = document.querySelector('.select-file-btn');
+        const uploadPreview = document.getElementById('upload-preview');
+        const uploadSubmit = document.getElementById('upload-submit');
+        const petTypeRadios = document.querySelectorAll('input[name="pet-type"]');
+        const captionInput = document.getElementById('caption-input'); // Get caption input
+        const galleryContainer = document.getElementById('gallery-container');
+        const emptyGallery = document.getElementById('empty-gallery');
+        // Removed errorMessage element
+
+        // Check Authentication
+        checkAuthentication();
+
+        // Load community posts
+        loadPawprints();
+
+        // Event Listeners
+        logoutBtn.addEventListener('click', () => {
+            fetch('/api/logout', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        showUploadBtn.addEventListener('click', () => {
+            uploadModal.style.display = 'block';
+            resetUploadForm();
+        });
+
+        closeModal.addEventListener('click', () => {
+            uploadModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === uploadModal) {
+                uploadModal.style.display = 'none';
+            }
+        });
+
+        selectFileBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Add event listeners to radio buttons
+        petTypeRadios.forEach(radio => {
+            radio.addEventListener('change', validateForm);
+        });
+
+        uploadSubmit.addEventListener('click', handleUpload);
+
+        // Functions
+        function checkAuthentication() {
+            fetch('/api/check-auth')
+            .then(response => response.json())
+            .then(data => {
+                if (data.authenticated) {
+                    userName.textContent = data.user.name;
+                } else {
+                    window.location.href = 'index.html';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Function to display time ago
+        function timeAgo(date) {
+            const now = new Date();
+            const past = new Date(date);
+            const diffInSeconds = Math.floor((now - past) / 1000);
+
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                day: 86400,
+                hour: 3600,
+                minute: 60,
+                second: 1
+            };
+
+            for (const [unit, seconds] of Object.entries(intervals)) {
+                const interval = Math.floor(diffInSeconds / seconds);
+                if (interval >= 1) {
+                    return interval === 1 ? `${interval} ${unit} ago` : `${interval} ${unit}s ago`;
+                }
+            }
+
+            return 'just now';
+        }
+
+
+        function loadPawprints() {
+            fetch('/api/pawprints')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Pawprints API response:", data); // Debug log
+
+                if (!data.success) {
+                    showError(data.message || 'Failed to load pawprints');
+                    return;
+                }
+
+                const pawprints = data.pawprints;
+
+                if (!pawprints || pawprints.length === 0) {
+                    emptyGallery.style.display = 'block';
+                    galleryContainer.style.display = 'none';
+                    return;
+                }
+
+                emptyGallery.style.display = 'none';
+                galleryContainer.style.display = 'grid';
+
+                // Clear current gallery
+                galleryContainer.innerHTML = '';
+
+                // Add posts to gallery
+                pawprints.forEach(post => {
+                    const postEl = document.createElement('div');
+                    postEl.className = 'gallery-item';
+                    postEl.dataset.pawprintId = post._id; // Store pawprint ID on the element
+
+                     // Use timeAgo function for date
+                    const displayDate = timeAgo(post.created_at);
+                    const caption = post.caption || ''; // Get caption or empty string
+
+                    postEl.innerHTML = `
+                        <div class="gallery-image-container">
+                             <img src="${post.image_path}" class="gallery-image" alt="Pet Photo">
+                        </div>
+                        <div class="gallery-content">
+                            <div class="pet-type ${post.pet_type}">${post.pet_type.charAt(0).toUpperCase() + post.pet_type.slice(1)}</div>
+                            <div class="gallery-user">Shared by <span>${post.user_name}</span></div>
+                            ${caption ? `<div class="gallery-caption">${caption}</div>` : ''} <div class="gallery-date">${displayDate}</div>
+                        </div>
+                    `;
+
+                    galleryContainer.appendChild(postEl);
+                });
+
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Failed to load pawprints. Please try again later.');
+            });
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.match('image.*')) {
+                showError('Please select an image file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadPreview.src = e.target.result;
+                uploadPreview.style.display = 'block';
+                validateForm();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function validateForm() {
+            let petTypeSelected = false;
+            petTypeRadios.forEach(radio => {
+                if (radio.checked) petTypeSelected = true;
+            });
+
+            // Enable submit button only if image is selected and pet type is chosen
+            // Caption is optional, so it doesn't affect button enablement
+            uploadSubmit.disabled = !(fileInput.files.length > 0 && petTypeSelected);
+        }
+
+        function resetUploadForm() {
+            fileInput.value = '';
+            uploadPreview.src = '';
+            uploadPreview.style.display = 'none';
+            petTypeRadios.forEach(radio => {
+                radio.checked = false;
+            });
+            captionInput.value = ''; // Clear caption input
+            uploadSubmit.disabled = true;
+            // Removed hideError();
+        }
+
+        // Modified showError function to use alert
+        function showError(message) {
+            alert(message);
+        }
+
+        // Removed hideError function
+        /*
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+        */
+
+        function handleUpload() {
+            // Get pet type
+            let petType = '';
+            petTypeRadios.forEach(radio => {
+                if (radio.checked) petType = radio.value;
+            });
+
+            const caption = captionInput.value.trim(); // Get caption value
+
+            // Create form data for the API request
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('pet_type', petType);
+            formData.append('caption', caption); // Append caption to form data
+
+
+            // Send to server
+            fetch('/api/pawprints', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal and reset form
+                    uploadModal.style.display = 'none';
+                    resetUploadForm();
+
+                    // Reload pawprints
+                    loadPawprints();
+                } else {
+                    // Use the new showError (alert)
+                    showError(data.message || 'Failed to upload. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Use the new showError (alert)
+                showError('An error occurred. Please try again.');
+            });
+        }
+    </script>
+</body>
+</html>

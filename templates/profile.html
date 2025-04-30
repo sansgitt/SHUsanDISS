@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Who's That Paw?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            padding: 20px;
+            color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #f5f5f5;
+            font-size: 2.5rem;
+        }
+
+        .paw-icon {
+            font-size: 2.5rem;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        /* Navigation styles */
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            text-align: center;
+            color: #f5f5f5;
+            text-decoration: none;
+            flex: 1;
+            transition: background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-item.active {
+            background-color: #bb86fc;
+            color: #121212;
+            font-weight: bold;
+        }
+
+        .nav-item:hover:not(.active) {
+            background-color: #3d3d3d;
+        }
+
+        /* User panel styles */
+        .user-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .welcome-text {
+            color: #ccc;
+        }
+
+        .username {
+            color: #bb86fc;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background-color: #333;
+            color: #f5f5f5;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #444;
+        }
+
+        /* Profile styles */
+        .profile-section {
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #f5f5f5;
+        }
+
+        .uploads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .upload-item {
+            background-color: #333;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-item:hover {
+            transform: translateY(-5px);
+        }
+
+         .upload-image-container {
+            flex-shrink: 0; /* Prevent image from shrinking */
+            height: 150px; /* Fixed height for consistency */
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1e1e1e;
+            overflow: hidden; /* Hide parts of image if it overflows container */
+        }
+
+
+        .upload-image {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Changed from cover to contain */
+            border-radius: 8px 8px 0 0;
+        }
+
+        .upload-info {
+            padding: 15px;
+             flex-grow: 1; /* Allow content to take available space */
+             display: flex;
+             flex-direction: column;
+        }
+
+        .upload-type {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .upload-type.ai {
+            background-color: #03dac6;
+            color: #121212;
+        }
+
+        .upload-type.community {
+            background-color: #bb86fc;
+            color: #121212;
+        }
+
+        .upload-details {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+
+        .upload-caption {
+            font-size: 14px;
+            color: #f5f5f5;
+            margin-bottom: 10px;
+            word-break: break-word; /* Prevent long words from overflowing */
+        }
+
+
+        .upload-date {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .no-uploads {
+            text-align: center;
+            color: #ccc;
+            padding: 20px;
+        }
+
+        .error-message {
+            background-color: #cf6679;
+            color: #121212;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            display: none;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .user-panel {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .uploads-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+
+            .upload-image-container {
+                height: 120px; /* Adjust height for smaller screens */
+            }
+        }
+
+        .game-stats {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .highlight {
+            color: #bb86fc;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .game-btn {
+            display: inline-block;
+            background-color: #bb86fc;
+            color: #121212;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+
+        .game-btn:hover {
+            background-color: #a370f7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="user-panel">
+            <div class="welcome-text">Welcome, <span id="profile-user-name" class="username"></span>!</div>
+            <button id="profile-logout-btn" class="logout-btn">Logout</button>
+        </div>
+
+        <h1><span class="paw-icon">🐾</span> My Profile</h1>
+
+        <div class="nav-bar">
+            <a href="/" class="nav-item">Breed Classifier</a>
+            <a href="/pawprints" class="nav-item">Community Pawprints</a>
+            <a href="/profile" class="nav-item active">My Profile</a>
+        </div>
+
+        <div id="error-message" class="error-message"></div>
+
+        <div class="profile-section">
+            <div class="section-header">
+                <div class="section-title">Breed Guesser Game</div>
+            </div>
+
+            <div class="game-stats">
+                <p>Your High Score: <span id="game-high-score" class="highlight">0</span>/10</p>
+                <a href="/game" class="game-btn">Play Breed Guesser</a>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <div class="section-header">
+                <div class="section-title">Recent AI Identifications</div>
+            </div>
+
+            <div id="ai-uploads" class="uploads-grid">
+                </div>
+
+            <div id="no-ai-uploads" class="no-uploads">
+                <p>You haven't identified any pets yet. Try the Breed Classifier!</p>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <div class="section-header">
+                <div class="section-title">My Community Pawprints</div>
+            </div>
+
+            <div id="community-uploads" class="uploads-grid">
+                </div>
+
+            <div id="no-community-uploads" class="no-uploads">
+                <p>You haven't shared any pet photos yet. Visit the Community Pawprints page to share!</p>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script>
+        // DOM Elements
+        const userName = document.getElementById('profile-user-name');
+        const logoutBtn = document.getElementById('profile-logout-btn');
+        const aiUploads = document.getElementById('ai-uploads');
+        const noAiUploads = document.getElementById('no-ai-uploads');
+        const communityUploads = document.getElementById('community-uploads');
+        const noCommunityUploads = document.getElementById('no-community-uploads');
+        const errorMessage = document.getElementById('error-message');
+
+        // Check Authentication
+        checkAuthentication();
+
+        // Load user uploads
+        loadUserUploads();
+
+        // Event Listeners
+        logoutBtn.addEventListener('click', () => {
+            fetch('/api/logout', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        // Functions
+        function checkAuthentication() {
+            fetch('/api/check-auth')
+            .then(response => response.json())
+            .then(data => {
+                if (data.authenticated) {
+                    userName.textContent = data.user.name;
+                } else {
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                window.location.href = '/';
+            });
+        }
+
+        // Function to display time ago
+        function timeAgo(date) {
+            const now = new Date();
+            const past = new Date(date);
+            const diffInSeconds = Math.floor((now - past) / 1000);
+
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                day: 86400,
+                hour: 3600,
+                minute: 60,
+                second: 1
+            };
+
+            for (const [unit, seconds] of Object.entries(intervals)) {
+                const interval = Math.floor(diffInSeconds / seconds);
+                if (interval >= 1) {
+                    return interval === 1 ? `${interval} ${unit} ago` : `${interval} ${unit}s ago`;
+                }
+            }
+
+            return 'just now';
+        }
+
+        function loadUserUploads() {
+            fetch('/api/user/uploads')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    showError(data.message || 'Failed to load your uploads');
+                    return;
+                }
+
+                // Update high score
+                document.getElementById('game-high-score').textContent = data.high_score || 0;
+
+                // Handle AI uploads
+                if (data.ai_uploads && data.ai_uploads.length > 0) {
+                    noAiUploads.style.display = 'none';
+                    aiUploads.style.display = 'grid';
+
+                    // Clear current uploads
+                    aiUploads.innerHTML = '';
+
+                    // Add uploads to grid
+                    data.ai_uploads.forEach(upload => {
+                        const uploadEl = document.createElement('div');
+                        uploadEl.className = 'upload-item';
+
+                        // Use timeAgo function for date
+                        const displayDate = timeAgo(upload.created_at);
+
+                        uploadEl.innerHTML = `
+                             <div class="upload-image-container">
+                                 <img src="${upload.image_path}" class="upload-image" alt="Pet Photo">
+                            </div>
+                            <div class="upload-info">
+                                <div class="upload-type ai">AI Identification</div>
+                                <div class="upload-details">${upload.species}: ${upload.breed}</div>
+                                <div class="upload-date">${displayDate}</div>
+                            </div>
+                        `;
+
+                        aiUploads.appendChild(uploadEl);
+                    });
+                } else {
+                    noAiUploads.style.display = 'block';
+                    aiUploads.style.display = 'none';
+                }
+
+                // Handle community uploads
+                if (data.community_uploads && data.community_uploads.length > 0) {
+                    noCommunityUploads.style.display = 'none';
+                    communityUploads.style.display = 'grid';
+
+                    // Clear current uploads
+                    communityUploads.innerHTML = '';
+
+                    // Add uploads to grid
+                    data.community_uploads.forEach(upload => {
+                        const uploadEl = document.createElement('div');
+                        uploadEl.className = 'upload-item';
+
+                        // Use timeAgo function for date
+                        const displayDate = timeAgo(upload.created_at);
+                        const caption = upload.caption || ''; // Get caption or empty string
+
+                        uploadEl.innerHTML = `
+                             <div class="upload-image-container">
+                                <img src="${upload.image_path}" class="upload-image" alt="Pet Photo">
+                             </div>
+                            <div class="upload-info">
+                                <div class="upload-type community">Community Post</div>
+                                <div class="upload-details">${upload.pet_type.charAt(0).toUpperCase() + upload.pet_type.slice(1)}</div>
+                                ${caption ? `<div class="upload-caption">${caption}</div>` : ''} <div class="upload-date">${displayDate}</div>
+                            </div>
+                        `;
+
+                        communityUploads.appendChild(uploadEl);
+                    });
+                } else {
+                    noCommunityUploads.style.display = 'block';
+                    communityUploads.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Failed to load your uploads. Please try again later.');
+            });
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
+
